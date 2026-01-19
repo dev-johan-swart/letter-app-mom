@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="af">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vir my Ma</title>
+  <link rel="manifest" href="letter-app-mom/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --sky1:#f2f7ff;
+      --sky2:#e6f0ff;
+      --ink:#2f3a4a;
+      --cloud:#ffffffcc;
+      --gold:#d6b87c;
+      --shadow:0 10px 25px rgba(0,0,0,.12);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Nunito', sans-serif;
+      color:var(--ink);
+      background:linear-gradient(180deg,var(--sky1),var(--sky2));
+      overflow-x:hidden;
+    }
+    .wrap{
+      max-width:760px;
+      margin:0 auto;
+      padding:22px 16px 90px;
+    }
+    .card{
+      background:var(--cloud);
+      backdrop-filter: blur(6px);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      padding:26px 22px;
+      margin:22px 0;
+    }
+    h1,h2,h4{
+      font-family:'Playfair Display', serif;
+      text-align:center;
+    }
+    h1{font-size:clamp(32px,6vw,44px)}
+    h2{font-size:clamp(22px,4vw,28px)}
+    p{font-size:clamp(17px,3.5vw,20px); line-height:1.6}
+
+    .hero{padding:44px 22px 36px}
+    .subtitle{text-align:center; opacity:.85}
+
+    .btn{
+      appearance:none; border:0; cursor:pointer;
+      padding:14px 24px; border-radius:999px;
+      font-size:18px; font-family:inherit;
+      background:linear-gradient(135deg,#f3e7c2,#d6b87c);
+      color:#3a2f17; box-shadow:0 8px 18px rgba(0,0,0,.18);
+    }
+    .btn.ghost{background:#fff}
+    .btn-row{display:flex; justify-content:center; gap:12px; margin-top:16px}
+
+    /* 🎥 VIDEO CARD */
+    .video-card{
+      opacity:0;
+      transform:translateY(40px);
+      transition:opacity .8s ease, transform .8s ease;
+    }
+
+    .video-card.visible{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .video-card.active{
+      transform:scale(1.05);
+      box-shadow:
+        0 25px 60px rgba(0,0,0,.25),
+        0 0 40px rgba(214,184,124,.45);
+    }
+
+    .video-wrap{
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      margin-top:16px;
+      cursor: pointer;
+    }
+
+    video{
+      width:100%;
+      display:block;
+    }
+
+    .float{
+      position:fixed; inset:0; pointer-events:none;
+    }
+    .bubble{
+      position:absolute; bottom:-80px;
+      background:var(--cloud);
+      padding:12px 18px;
+      border-radius:999px;
+      box-shadow:var(--shadow);
+      font-size:14px;
+      animation:rise linear forwards;
+    }
+    @keyframes rise{
+      to{transform:translateY(-120vh); opacity:0}
+    }
+    @keyframes pop{
+      0%{transform:scale(.6); opacity:0}
+      60%{transform:scale(1.1); opacity:1}
+      100%{transform:scale(1); opacity:0}
+    }
+
+    img{
+      width:100%; border-radius:20px;
+      box-shadow:var(--shadow); margin-top:12px;
+    }
+
+    .music{
+      position:fixed; right:16px; bottom:26px;
+      background:var(--cloud); border-radius:16px;
+      box-shadow:var(--shadow); padding:10px 12px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .toggle{
+      width:46px; height:28px; border-radius:999px;
+      background:#dcdcdc; position:relative; cursor:pointer;
+    }
+    .toggle::after{
+      content:''; width:22px; height:22px; border-radius:50%;
+      background:#fff; position:absolute; top:3px; left:3px;
+      transition:left .25s ease; box-shadow:0 2px 6px rgba(0,0,0,.25);
+    }
+    .toggle.on{background:#d6b87c}
+    .toggle.on::after{left:21px}
+    #amenBtn { touch-action: manipulation; }
+
+    footer{text-align:center; opacity:.7;margin-bottom: 28px; margin-top:10px}
+  </style>
+</head>
+<body>
+  <audio id="bgm" src="./music/song.mp3" loop></audio>
+
+  <div class="float" id="float"></div>
+
+  <div class="wrap">
+    <section class="card hero">
+      <h1>Vir my Ma</h1>
+      <p class="subtitle">’n Boodskap van liefde, lig en dankbaarheid</p>
+      <div class="btn-row">
+        <button class="btn" id="start">Maak oop</button>
+      </div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn ghost" id="tonePlayful">Speels</button>
+        <button class="btn ghost" id="tonePoetic">Poëties</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <p id="introText">
+        Ma, hierdie is net ’n klein plekkie gemaak met baie liefde.
+        ’n Plek waar my hart sag praat, en waar ma rustig kan lees —
+        elke oomblik hier laat my glimlag.
+      </p>
+    </section>
+
+    <section class="card">
+      <p>
+        Ma se liefde en leiding het my menslik gehou.
+        Sonder ma sou dit maklik gewees het om my pad te verloor.
+        Met ma se wysheid en gebede het ek geleer om vriendelik te bly,
+        om reg te doen, en om hoop te hou.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>’n Kosbare Moeder</h2>
+      <img src="https://e7.pngegg.com/pngimages/509/931/png-clipart-infant-mother-baby-bottle-breastfeeding-baby-rattle-cute-baby-baby-announcement-card-child-thumbnail.png" alt="Kosbare herinnering" />
+      <p>
+        Hierdie foto dra vir my soveel betekenis.
+        Ek hoop ma voel die liefde elke keer wanneer ma daarna kyk.
+      </p>
+    </section>
+
+    <section class="card video-card" id="videoCard">
+      <h2>’n Sagte herinnering</h2>
+      <h4><em>Druk gerus op die video om die oomblik te herleef 🤍</em></h4>
+      <div class="video-wrap">
+        <video id="memoryVideo" muted playsinline>
+          <source src="./music/ma-vid.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p>
+        ’n Klein oomblik, net om weer te onthou —
+        liefde leef in beweging, lig en tyd.
+      </p>
+    </section>
+
+    <section class="card">
+      <p>
+        Ma, ek is vandag wie ek is omdat ma altyd geglo het.
+        Ma se ondersteuning dra my wanneer ek moeg raak,
+        en ma se liefde gee my krag om aan te hou.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>’n Stil seën</h2>
+      <p id="blessingText">
+        Mag vrede altyd naby ma wees.
+        Mag liefde ma omvou.
+        En mag God se lig sag oor ma skyn — elke dag.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>’n Sagte afsluiting</h2>
+      <p>
+        Ma, ek wil hê ma moet weet: ma is geliefd, gesien en waardeer.
+        Alles wat goed is in my, dra iets van ma.
+      </p>
+      <p>
+        Hierdie liefde het geen einde nie — dit bly, dit dra,
+        en dit laat my elke oomblik glimlag.
+      </p>
+      <div class="btn-row"><button class="btn ghost" id="restart">Lees weer</button></div>
+    </section>
+    
+    <div class="btn-row" style="justify-content:center; margin:10px 0 0">
+        <button class="btn ghost" id="amenBtn" aria-label="Amen">🤍 Amen</button>
+    </div>
+      </div>
+
+      <footer>Met al my liefde ❤️</footer>
+      
+      <div class="music">
+        <span>Musiek</span>
+        <div class="toggle" id="musicToggle"></div>
+      </div>
+      
+  <script>
+
+if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/letter-app-mom/service-worker.js");
+    }
+
+const bgm = document.getElementById('bgm');
+const toggle = document.getElementById('musicToggle');
+let playing = false;
+const bgmVolume = 0.25;
+
+// "Maak oop" button
+document.getElementById('start').onclick = () => {
+  if (!playing) {
+    bgm.volume = 0;
+    bgm.play().catch(() => {});
+    fadeAudio(bgm, 0, bgmVolume, 800);
+    playing = true;
+    toggle.classList.add('on');
+  }
+};
+
+// Music toggle button
+toggle.onclick = () => {
+  playing = !playing;
+  if (playing) {
+    bgm.volume = 0;
+    bgm.play().catch(() => {});
+    fadeAudio(bgm, 0, bgmVolume, 800);
+    toggle.classList.add('on');
+  } else {
+    fadeAudio(bgm, bgm.volume, 0, 800).then(() => bgm.pause());
+    toggle.classList.remove('on');
+  }
+};
+
+// Smooth audio fade function
+function fadeAudio(audio, from, to, duration) {
+  return new Promise((resolve) => {
+    const stepTime = 50;
+    const steps = duration / stepTime;
+    let stepCount = 0;
+    const volumeStep = (to - from) / steps;
+    audio.volume = from;
+    const fadeInterval = setInterval(() => {
+      stepCount++;
+      audio.volume = Math.min(Math.max(audio.volume + volumeStep, 0), 1);
+      if (stepCount >= steps) {
+        clearInterval(fadeInterval);
+        resolve();
+      }
+    }, stepTime);
+  });
+}
+
+// Tone messages
+const playfulMessages = [
+  'Ma se liefde laat my glimlag',
+  'Dankie vir elke warm drukkie',
+  'Ma is my sonskyn',
+  'Elke oomblik met ma maak my bly',
+  'Ek is lief vir ma'
+];
+const poeticMessages = [
+  'Ma se liefde dra my soos lig',
+  'Dankie vir ma se sagte gebede',
+  'Ma is my rustige lig',
+  'Elke oomblik is ’n geskenk',
+  'My hart glimlag oor ma'
+];
+let currentMessages = poeticMessages;
+
+const introText = document.getElementById('introText');
+const blessingText = document.getElementById('blessingText');
+
+document.getElementById('tonePlayful').onclick = () => {
+  currentMessages = playfulMessages;
+  introText.textContent =
+    'Ma, hierdie plekkie is vol lig en liefde. Elke oomblik hier laat my glimlag en dink aan ma se warm hart.';
+  blessingText.textContent =
+    'Mag vreugde ma vind. Mag lag maklik kom. En mag liefde elke dag saam met ma stap.';
+};
+document.getElementById('tonePoetic').onclick = () => {
+  currentMessages = poeticMessages;
+  introText.textContent =
+    'Ma, hierdie is ’n stil plekkie gemaak met liefde. Elke oomblik hier laat my glimlag en herinner my aan ma se lig.';
+  blessingText.textContent =
+    'Mag vrede altyd naby ma wees. Mag liefde ma omvou. En mag God se lig sag oor ma skyn — elke dag.';
+};
+
+// Floating bubbles
+const float = document.getElementById('float');
+function spawn() {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.textContent = currentMessages[Math.floor(Math.random() * currentMessages.length)];
+  b.style.left = Math.random() * 80 + 10 + '%';
+  b.style.animationDuration = 12 + Math.random() * 8 + 's';
+  float.appendChild(b);
+  setTimeout(() => b.remove(), 20000);
+}
+setInterval(spawn, 3500);
+
+// Restart buttons
+const restartBtn = document.getElementById('restart');
+if (restartBtn) {
+  restartBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+const restartTopBtn = document.getElementById('restartTop');
+if (restartTopBtn) {
+  restartTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* 🎥 Video logic */
+const videoCard = document.getElementById('videoCard');
+const video = document.getElementById('memoryVideo');
+let videoFocused = false;
+
+// Ensure video loops
+video.loop = true;
+
+// Intersection observer for fade in/out
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        videoCard.classList.add('visible');
+        if (!videoFocused) {
+          video.currentTime = 0;
+          video.muted = true;
+          video.play().catch(() => {});
+        }
+        if (!videoFocused && playing) {
+          fadeAudio(bgm, bgm.volume, bgmVolume, 800);
+          toggle.classList.add('on');
+        }
+      } else {
+        videoCard.classList.remove('visible');
+        videoCard.classList.remove('active');
+        video.muted = true;
+        if (playing) {
+          fadeAudio(bgm, 0, bgmVolume, 800).then(() => toggle.classList.add('on'));
+        }
+      }
+    });
+  },
+  { threshold: 0.4 }
+);
+observer.observe(videoCard);
+
+// Click video to toggle focus/audio without pausing video
+video.onclick = () => {
+  videoFocused = !videoFocused;
+  if (videoFocused) {
+    fadeAudio(bgm, bgm.volume, 0, 800).then(() => bgm.pause());
+    toggle.classList.remove('on');
+    video.muted = false;
+    videoCard.classList.add('active');
+  } else {
+    video.muted = true;
+    videoCard.classList.remove('active');
+    if (playing) {
+      fadeAudio(bgm, 0, bgmVolume, 800).then(() => {
+        bgm.play().catch(() => {});
+        toggle.classList.add('on');
+      });
+    }
+  }
+};
+
+/* 🤍 Amen / Heart tap */
+const amenBtn = document.getElementById('amenBtn');
+amenBtn.onclick = () => {
+  const a = document.createElement('div');
+  a.textContent = 'Amen ❤️';
+  a.style.position = 'fixed';
+  a.style.left = '50%';
+  a.style.bottom = '120px';
+  a.style.transform = 'translateX(-50%)';
+  a.style.background = 'var(--cloud)';
+  a.style.padding = '10px 16px';
+  a.style.borderRadius = '999px';
+  a.style.boxShadow = 'var(--shadow)';
+  a.style.animation = 'pop 1.6s ease forwards';
+  document.body.appendChild(a);
+  setTimeout(() => a.remove(), 1600);
+};
+</script>
+
+</body>
+</html>
